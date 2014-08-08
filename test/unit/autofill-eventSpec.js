@@ -14,23 +14,36 @@ describe('check other inputs when one input fires a blur event', function() {
     container.remove()
   });
 
-  it('should check elements in the same form and not in other forms after 20ms when an element is blurred', function() {
-    jasmine.Clock.useMock();
+  describe('when an element is blurred', function () {
+    var spy, inputs;
 
-    var spy = spyOn(testutils.$.prototype, 'checkAndTriggerAutoFillEvent');
+    beforeEach(function () {
+      jasmine.Clock.useMock();
 
-    container.append('<form><input type="text" id="id1"><input type="text" id="id2"></form><form><input type="text" id="id3"></form>');
-    var inputs = container.find('input');
+      spy = spyOn(testutils.$.prototype, 'checkAndTriggerAutoFillEvent');
 
-    testutils.triggerBlurEvent(inputs[0]);
-    expect(spy).not.toHaveBeenCalled();
+      container.append('<form><input type="text" id="id1"><input type="text" id="id2"></form><form><input type="text" id="id3"></form>');
+      inputs = container.find('input');
 
-    jasmine.Clock.tick(20);
+      testutils.triggerBlurEvent(inputs[0]);
+    });
 
-    expect(spy).toHaveBeenCalled();
-    expect(spy.mostRecentCall.object.length).toBe(2);
-    expect(spy.mostRecentCall.object[0]).toBe(inputs[0]);
-    expect(spy.mostRecentCall.object[1]).toBe(inputs[1]);
+    it('should check elements immediately', function () {
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should check elements after 20ms for Chrome', function() {
+      spy.reset(); // Reset for the immediate check call
+      jasmine.Clock.tick(20);
+
+      expect(spy).toHaveBeenCalled();
+    });
+
+    it('should check elements in the same form and not in other forms', function() {
+      expect(spy.mostRecentCall.object.length).toBe(2);
+      expect(spy.mostRecentCall.object[0]).toBe(inputs[0]);
+      expect(spy.mostRecentCall.object[1]).toBe(inputs[1]);
+    });
   });
 
   describe('checkAndTriggerAutoFillEvent', function() {

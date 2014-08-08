@@ -17,10 +17,13 @@
   // as Chrome does not fire change events in all cases an input is changed
   // (e.g. when starting to type and then finish the input by auto filling a username)
   addGlobalEventListener('blur', function(target) {
+    var elements = findParentForm(target).find('input');
+    elements.checkAndTriggerAutoFillEvent();
+
     // setTimeout needed for Chrome as it fills other
     // form fields a little later...
     window.setTimeout(function() {
-      findParentForm(target).find('input').checkAndTriggerAutoFillEvent();
+      elements.checkAndTriggerAutoFillEvent();
     }, 20);
   });
 
